@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import com.example.android.navigation.databinding.FragmentGameBinding
 
 class GameFragment : Fragment() {
     data class Question(
-        val text: String,
-        val answers: List<String>
+        val text: String, val answers: List<String>
     )
 
     // The first answer is the correct one.  We randomize the answers before showing the text.
@@ -22,45 +22,32 @@ class GameFragment : Fragment() {
         Question(
             text = "What is Android Jetpack?",
             answers = listOf("all of these", "tools", "documentation", "libraries")
-        ),
-        Question(
+        ), Question(
             text = "Base class for Layout?",
             answers = listOf("ViewGroup", "ViewSet", "ViewCollection", "ViewRoot")
-        ),
-        Question(
+        ), Question(
             text = "Layout for complex Screens?",
             answers = listOf("ConstraintLayout", "GridLayout", "LinearLayout", "FrameLayout")
-        ),
-        Question(
+        ), Question(
             text = "Pushing structured data into a Layout?",
             answers = listOf("Data Binding", "Data Pushing", "Set Text", "OnClick")
-        ),
-        Question(
+        ), Question(
             text = "Inflate layout in fragments?",
             answers = listOf("onCreateView", "onViewCreated", "onCreateLayout", "onInflateLayout")
-        ),
-        Question(
+        ), Question(
             text = "Build system for Android?",
             answers = listOf("Gradle", "Graddle", "Grodle", "Groyle")
-        ),
-        Question(
-            text = "Android vector format?",
-            answers = listOf(
-                "VectorDrawable",
-                "AndroidVectorDrawable",
-                "DrawableVector",
-                "AndroidVector"
+        ), Question(
+            text = "Android vector format?", answers = listOf(
+                "VectorDrawable", "AndroidVectorDrawable", "DrawableVector", "AndroidVector"
             )
-        ),
-        Question(
+        ), Question(
             text = "Android Navigation Component?",
             answers = listOf("NavController", "NavCentral", "NavMaster", "NavSwitcher")
-        ),
-        Question(
+        ), Question(
             text = "Registers app with launcher?",
             answers = listOf("intent-filter", "app-registry", "launcher-registry", "app-launcher")
-        ),
-        Question(
+        ), Question(
             text = "Mark a layout for Data Binding?",
             answers = listOf("<layout>", "<binding>", "<data-binding>", "<dbinding>")
         )
@@ -69,12 +56,11 @@ class GameFragment : Fragment() {
     lateinit var currentQuestion: Question
     lateinit var answers: MutableList<String>
     private var questionIndex = 0
-    private val numQuestions = Math.min((questions.size + 1) / 2, 3)
+    private val numQuestions = ((questions.size + 1) / 2).coerceAtMost(3)
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
 
         // Inflate the layout for this fragment
         val binding = DataBindingUtil.inflate<FragmentGameBinding>(
@@ -88,8 +74,7 @@ class GameFragment : Fragment() {
         binding.game = this
 
         // Set the onClickListener for the submitButton
-        binding.submitButton.setOnClickListener @Suppress("UNUSED_ANONYMOUS_PARAMETER")
-        { view: View ->
+        binding.submitButton.setOnClickListener @Suppress("UNUSED_ANONYMOUS_PARAMETER") { view: View ->
             val checkedId = binding.questionRadioGroup.checkedRadioButtonId
             // Do nothing if nothing is checked (id == -1)
             if (-1 != checkedId) {
@@ -109,10 +94,15 @@ class GameFragment : Fragment() {
                         setQuestion()
                         binding.invalidateAll()
                     } else {
-                        // We've won!  Navigate to the gameWonFragment.
+                        view.findNavController().navigate(
+                                GameFragmentDirections.actionGameFragmentToGameWonFragment(
+                                    numQuestions, questionIndex
+                                )
+                            )
                     }
                 } else {
-                    // Game over! A wrong answer sends us to the gameOverFragment.
+                    view.findNavController()
+                        .navigate(GameFragmentDirections.actionGameFragmentToGameOverFragment())
                 }
             }
         }
